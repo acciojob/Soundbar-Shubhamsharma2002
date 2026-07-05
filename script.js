@@ -1,36 +1,41 @@
-//your JS code here. If required.
-// Array matching the target sound file names inside the 'sounds' folder
 const sounds = ["applause", "boo", "gasp", "tada", "victory", "wrong"];
 const buttonsContainer = document.getElementById("buttons");
 
-// Track references to the active playing audio object
-let currentAudio = null;
+// Create a map to store our DOM audio elements
+const audioElements = {};
 
-// Function to stop any actively playing track and reset its playback timeline
+// 1. Create and append the audio elements to the DOM so Cypress can detect them
+sounds.forEach(sound => {
+    const audio = document.createElement("audio");
+    audio.src = `sounds/${sound}.mp3`;
+    document.body.appendChild(audio); // This puts it in the DOM
+    audioElements[sound] = audio;
+});
+
+// 2. Helper function to stop all audio elements
 function stopSongs() {
-    if (currentAudio) {
-        currentAudio.pause();
-        currentAudio.currentTime = 0;
-    }
+    sounds.forEach(sound => {
+        const audio = audioElements[sound];
+        audio.pause();
+        audio.currentTime = 0;
+    });
 }
 
-// Generate sound triggers dynamically 
+// 3. Generate the trigger buttons dynamically
 sounds.forEach(sound => {
     const button = document.createElement("button");
     button.className = "btn";
-    button.innerText = sound.charAt(0).toUpperCase() + sound.slice(1); // Capitalize button names
+    button.innerText = sound.charAt(0).toUpperCase() + sound.slice(1);
 
     button.addEventListener("click", () => {
-        stopSongs(); // Clear any running audio track first
-        
-        currentAudio = new Audio(`sounds/${sound}.mp3`);
-        currentAudio.play();
+        stopSongs(); // Stop any other running audio first
+        audioElements[sound].play(); // Play the clicked track
     });
 
     buttonsContainer.appendChild(button);
 });
 
-// Create and insert the global stop button
+// 4. Create and insert the global stop button
 const stopButton = document.createElement("button");
 stopButton.className = "stop";
 stopButton.innerText = "Stop";
